@@ -4,8 +4,8 @@ require 'sinatra/reloader'
 require 'sqlite3'
 
 configure do
-	@db = SQLite3::Database.new 'databaseBarberShop.db'
-	@db.execute 'CREATE TABLE IF NOT EXISTS 
+	db = get_db
+	db.execute 'CREATE TABLE IF NOT EXISTS 
 		"users" 
 			(
 				"id" INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -60,7 +60,7 @@ post '/visit' do
 				:phone => 'Enter phone',
 				:datetime => 'Enter time' }
 		
-			@error = hh.select {|key,_| params[key] == ''}.values.join(' & ')
+			@error = hh.select {|key,_| params[key] == ''}.values.join(', ')
 
 				if @error != ''
 					return erb :visit
@@ -75,7 +75,24 @@ post '/visit' do
 		# end
 
 
+	get_db.execute 'insert into 
+			users
+	 			(
+	 			username, 
+	 			phone, 
+	 			date_stamp, 
+	 			color, 
+	 			barber
+	 			)
+
+	 			values (?, ?, ?, ?, ?)', 
+	 			[@username, @phone, @datetime, @color, @barber]
+
 
 	erb "OK, your name: #{@username}, your phone: #{@phone}, date: #{@datetime} and your color: #{@color}"
 
+end
+
+def get_db
+	return SQLite3::Database.new 'databaseBarberShop.db'
 end
